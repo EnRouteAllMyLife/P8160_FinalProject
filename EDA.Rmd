@@ -1,0 +1,29 @@
+---
+title: "EDA"
+author: "Yumeng Qi"
+date: "2024-04-15"
+output: html_document
+---
+
+```{r setup}
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE, 
+  message = FALSE,
+  fig.dim = c(8, 4),
+  fig.format = "png")
+library(tidyverse)
+theme_set(theme_bw() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+df_raw = read.csv("./data/diabetes.csv") |> 
+  janitor::clean_names() |>
+  mutate(across(c(glucose, blood_pressure, skin_thickness, insulin, bmi), ~na_if(.x, 0)))
+df_raw|>skimr::skim()
+```

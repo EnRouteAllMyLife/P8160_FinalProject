@@ -73,15 +73,23 @@ library(ggplot2)
 
 # Ensure the cluster and diabetes_status variables are factors
 df$cluster <- factor(clusters$classification)
-# Calculate the proportion of outcome (mean) within each cluster
-cluster_outcome_mean <- aggregate(outcome ~ cluster, data = df, FUN = mean)
+cluster_means <- aggregate(outcome ~ cluster, data = df, FUN = mean)
 
 # Plot the distribution of diabetes status within each cluster
-ggplot(df, aes(x = cluster, y = outcome, fill = outcome)) +
-  geom_bar(stat = "identity") +
-  geom_text(data = cluster_outcome_mean, aes(label = sprintf("%.2f", outcome)), vjust = -0.5, color = "black", size = 3) +
+ggplot(df, aes(x = cluster, fill = factor(outcome))) +
+  geom_bar(position = "fill") +
+  geom_text(data = cluster_means, aes(label = sprintf("%.2f", outcome), y = outcome), vjust = -0.5, color = "black", size = 3) +
+  scale_fill_manual(values = c("0" = "blue", "1" = "red"), labels = c("0" = "Non-Diabetes", "1" = "Diabetes")) +
   labs(x = "Cluster", y = "Proportion", fill = "Diabetes Status") +
   ggtitle("Distribution of Diabetes Status by Cluster (Proportion by Mean Outcome)")
+
+# OR
+# Plot the mean outcome for each cluster
+ggplot(cluster_means, aes(x = cluster, y = outcome)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = sprintf("%.2f", outcome)), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "Cluster", y = "Mean Outcome") +
+  ggtitle("Mean Outcome for Each Cluster")
 
 # Plot the relationship between glucose and insulin, colored by cluster
 ggplot(df, aes(x = glucose, y = insulin, color = factor(cluster))) +

@@ -1,0 +1,92 @@
+---
+title: "test"
+author: "Huanyu Chen"
+date: "2024-04-22"
+output: pdf_document
+---
+
+```{r}
+# Load necessary libraries
+library(mclust)
+library(tidyverse)
+
+# Read the data
+df <- read.csv("./data/diabetes.csv") |> 
+  janitor::clean_names() |>
+  mutate(across(c(glucose, blood_pressure, skin_thickness, insulin, bmi), ~na_if(.x, 0)))
+
+# Handle missing values
+df[is.na(df)] <- 0
+
+# Extract features
+X <- df[, c("pregnancies", "glucose", "blood_pressure", "skin_thickness", "insulin", "bmi",
+            "diabetes_pedigree_function", "age")]
+
+# Define the EM algorithm function
+EM_algorithm <- function(X, num_clusters, max_iter = 100, tol = 1e-6) {
+  # Initialize parameters
+  model <- Mclust(X, G = num_clusters)
+  
+  for (iter in 1:max_iter) {
+    # E-step
+    responsibilities <- matrix(0, nrow = nrow(X), ncol = num_clusters)
+    for (k in 1:num_clusters) {
+      responsibilities[, k] <- model$z[, k] * model$parameters$pro[k]
+    }
+    responsibilities <- responsibilities / rowSums(responsibilities)
+    
+    # M-step
+    model <- Mclust(X, G = num_clusters, z = responsibilities)
+    
+    # Calculate log-likelihood and check for convergence
+    log_likelihood <- sum(log(apply(model$z * model$parameters$pro, 1, sum)))
+    if (iter > 1 && abs(log_likelihood - prev_log_likelihood) < tol) {
+      break
+    }
+    prev_log_likelihood <- log_likelihood
+  }
+  
+  return(model)
+}
+
+# Call the EM algorithm
+num_clusters <- 3  # Set the number of clusters
+gmm_model <- EM_algorithm(X, num_clusters)
+
+# Get the cluster assignments for each sample
+clusters <- predict(gmm_model)
+
+# View the feature patterns of the clusters
+cluster_means <- t(apply(gmm_model$parameters$mean, 2, function(x) round(x, 2)))
+print(cluster_means)
+
+# View the mixing weights of the clusters
+mixing_weights <- round(gmm_model$parameters$pro, 2)
+print(mixing_weights)
+
+# Further analysis can be performed based on the cluster assignments,
+# for example, analyzing the relationship between cluster assignments and diabetes status
+```
+
+```{r}
+library(ggplot2)
+
+# Ensure the cluster and diabetes_status variables are factors
+df$cluster <- factor(clusters$classification)
+# Calculate the proportion of outcome (mean) within each cluster
+cluster_outcome_mean <- aggregate(outcome ~ cluster, data = df, FUN = mean)
+
+# Plot the distribution of diabetes status within each cluster
+ggplot(df, aes(x = cluster, y = outcome, fill = outcome)) +
+  geom_bar(stat = "identity") +
+  geom_text(data = cluster_outcome_mean, aes(label = sprintf("%.2f", outcome)), vjust = -0.5, color = "black", size = 3) +
+  labs(x = "Cluster", y = "Proportion", fill = "Diabetes Status") +
+  ggtitle("Distribution of Diabetes Status by Cluster (Proportion by Mean Outcome)")
+
+# Plot the relationship between glucose and insulin, colored by cluster
+ggplot(df, aes(x = glucose, y = insulin, color = factor(cluster))) +
+  geom_point() +
+  labs(x = "Glucose", y = "Insulin", color = "Cluster") +
+  ggtitle("Relationship between Glucose and Insulin by Cluster")
+```
+

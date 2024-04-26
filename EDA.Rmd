@@ -19,6 +19,7 @@ options(
   ggplot2.continuous.fill = "viridis"
 )
 
+set.seed(1)
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
@@ -32,16 +33,61 @@ df_raw|>skimr::skim()
 
 ```{r}
 # Get a list of all '.R' files in the directory
-files <- list.files(path = "./function", pattern = "\\.R$", full.names = TRUE)
+files = list.files(path = "./function", pattern = "\\.R$", full.names = TRUE)
 
 # Source all files
 for (file in files) {
   source(file)
 }
-source('./function/Responsibility.R')
-source('./function/WorkResp.R')
-source('./function/WorkRespIndiv.R')
-df = df_raw |> dplyr::select(-outcome) |> as.matrix()
-fit = FitMix(df, k = 3, maxit = 1000, eps = 1e-06,  report = TRUE) 
 
+df = df_raw |> dplyr::select(-outcome) |> as.matrix()
+df_scaled = scale(df) 
+#BIC = c()
+#for (i in 2:5){
+#  fit = FitMix(df_scaled, k = i, maxit = 1000, eps = 1e-06,  report = TRUE) 
+#  BIC = c(BIC,fit$BIC)
+#}
+
+#c(3350.656 2934.068 2486.043 2125.018)
+
+
+fit1 = FitMix(df_scaled, k = 2, maxit = 1000, eps = 1e-06,  report = TRUE) 
+fit1$Means
+fit1$Covariances
+table(fit1$Data$outcome, fit1$Data$assignments)
 ```
+
+```{r, min BIC}
+fit5 = FitMix(df_scaled, k = 5, maxit = 1000, eps = 1e-06,  report = FALSE ) 
+
+#fit4$Means
+#fit4$Covariances
+table(fit5$Data$outcome, fit5$Data$assignments)
+```
+```{r, seperately build the model}
+library(pROC)
+df_result = fit5$Complete_data |>
+  mutate(outcome = df_raw[,'outcome'])
+for (i in 0:5){
+  print(i)
+  if (i == 0){
+    data = df_result|> dplyr::select(-assignments)
+    actuals = df_result |> pull(outcome) 
+  }
+  else{
+    data = df_result|> filter(assignments == i) |> dplyr::select(-assignments)
+    actuals = df_result|> filter(assignments == i) |> pull(outcome) }
+  
+  
+  glm.fit = glm(outcome ~ ., data = data, family = binomial)
+  # Predict on the test data
+  probabilities = predict(glm.fit, newdata = data, type = "response")
+  # Calculate AUC
+  roc_obj = roc(actuals, probabilities)
+  auc_value = auc(roc_obj)
+  print(auc_value)
+  # Plot ROC curve
+  plot(roc_obj, main=sprintf("ROC Curve (AUC = %0.2f)", auc_value))
+}
+```
+

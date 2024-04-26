@@ -27,15 +27,19 @@ FitMix=function (data, k = 2, maxit = 1000, eps = 1e-06,  report = TRUE)
   theta1 <- Maximization(theta0, Update, maxit, eps, report)
 
   assign <- MixClusterAssign(d,k,init_order, theta1)
-  #imputed <- MixImpute(n0,n1,d,k,data_comp,data_incomp,init_order, theta1)
+  imputed <- MixImpute(n0,n1,d,k,data_comp,data_incomp,init_order, theta1)
   
   
   
   
-  out <- list(Assignments = assign$Assignments, 
+  out <- list(Data = cbind(df_raw,data.frame(assignments = assign$Assignments)),
               Density = assign$Density,
               Responsibilities = assign$Responsibilities,
+              Complete_data = cbind(imputed,data.frame(assignments = assign$Assignments)),
+              Means = theta1$means, 
               Covariances = theta1$covs, 
-              Proportions = theta1$pi)
+              Objective = theta1$new_obj,
+              Proportions = theta1$pi,
+              BIC = log(n_row)* (d * k) - theta1$new_obj )
   return(out)
 }

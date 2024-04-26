@@ -42,6 +42,6 @@ source('./function/Responsibility.R')
 source('./function/WorkResp.R')
 source('./function/WorkRespIndiv.R')
 df = df_raw |> dplyr::select(-outcome) |> as.matrix()
-fit = FitMix(df, k = 3)
+fit = FitMix(df, k = 3, maxit = 1000, eps = 1e-06,  report = TRUE) 
 
 ```

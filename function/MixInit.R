@@ -1,11 +1,6 @@
 # k = 2
-MixInit = function (split_data, k#, init_means, init_covs, init_props
-                    ) 
-{
+MixInit = function (n0, n1, k,data_comp, data_incomp,d) {
   theta0 <- list()
-  n0 <- split_data$n0 #nrow(data_comp)
-  d <- split_data$n_col #ncol(data)
-  data_comp <- split_data$data_comp 
   
   if (n0 == 0) {
       stop("If no observations are complete, initial values are required for all parameters.")
@@ -40,7 +35,7 @@ MixInit = function (split_data, k#, init_means, init_covs, init_props
   }
   
  
-  theta0$gamma <- Responsibility(split_data, theta0$means, 
+  theta0$gamma <- Responsibility(n0, n1, k,data_comp, data_incomp, theta0$means, 
                                  theta0$covs, theta0$pi)
   return(theta0)
 }

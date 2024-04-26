@@ -27,3 +27,21 @@ df_raw = read.csv("./data/diabetes.csv") |>
   mutate(across(c(glucose, blood_pressure, skin_thickness, insulin, bmi), ~na_if(.x, 0)))
 df_raw|>skimr::skim()
 ```
+
+
+
+```{r}
+# Get a list of all '.R' files in the directory
+files <- list.files(path = "./function", pattern = "\\.R$", full.names = TRUE)
+
+# Source all files
+for (file in files) {
+  source(file)
+}
+source('./function/Responsibility.R')
+source('./function/WorkResp.R')
+source('./function/WorkRespIndiv.R')
+df = df_raw |> dplyr::select(-outcome) |> as.matrix()
+fit = FitMix(df, k = 3)
+
+```

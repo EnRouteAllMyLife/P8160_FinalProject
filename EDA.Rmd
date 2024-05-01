@@ -13,15 +13,17 @@ knitr::opts_chunk$set(
   fig.dim = c(8, 4),
   fig.format = "png")
 library(tidyverse)
+library(pROC)
+
 theme_set(theme_bw() + theme(legend.position = "bottom"))
-options(
-  ggplot2.continuous.colour = "viridis",
-  ggplot2.continuous.fill = "viridis"
-)
+#options(
+#  ggplot2.continuous.colour = "viridis",
+#  ggplot2.continuous.fill = "viridis"
+#)
 
 set.seed(1)
-scale_colour_discrete = scale_colour_viridis_d
-scale_fill_discrete = scale_fill_viridis_d
+#scale_colour_discrete = scale_colour_viridis_d
+#scale_fill_discrete = scale_fill_viridis_d
 
 df_raw = read.csv("./data/diabetes.csv") |> 
   janitor::clean_names() |>
@@ -29,7 +31,7 @@ df_raw = read.csv("./data/diabetes.csv") |>
 df_raw|>skimr::skim()
 ```
 
-
+# load data
 
 ```{r}
 # Get a list of all '.R' files in the directory
@@ -42,6 +44,12 @@ for (file in files) {
 
 df = df_raw |> dplyr::select(-outcome) |> as.matrix()
 df_scaled = scale(df) 
+
+```
+
+# K=2
+
+```{r}
 #BIC = c()
 #for (i in 2:5){
 #  fit = FitMix(df_scaled, k = i, maxit = 1000, eps = 1e-06,  report = TRUE) 
@@ -52,42 +60,39 @@ df_scaled = scale(df)
 
 
 fit1 = FitMix(df_scaled, k = 2, maxit = 1000, eps = 1e-06,  report = TRUE) 
-fit1$Means
-fit1$Covariances
+
+# confustion matrix 
 table(fit1$Data$outcome, fit1$Data$assignments)
+
+(df_mean_fit1 = ExtractMean(fit1,2))
+MeanPlot(df_mean_fit1)
+
 ```
+
+```{r}
+df_result= EvalFunc(fit1, k = 2)
+print(df_result$auc_plot)
+df_result$df_tpr
+
+```
+
+
+# K = 5
+
 
 ```{r, min BIC}
 fit5 = FitMix(df_scaled, k = 5, maxit = 1000, eps = 1e-06,  report = FALSE ) 
 
-#fit4$Means
-#fit4$Covariances
 table(fit5$Data$outcome, fit5$Data$assignments)
 ```
+```{r}
+df_mean_fit5 = ExtractMean(fit5,5)
+MeanPlot(df_mean_fit5)
+```
+
 ```{r, seperately build the model}
-library(pROC)
-df_result = fit5$Complete_data |>
-  mutate(outcome = df_raw[,'outcome'])
-for (i in 0:5){
-  print(i)
-  if (i == 0){
-    data = df_result|> dplyr::select(-assignments)
-    actuals = df_result |> pull(outcome) 
-  }
-  else{
-    data = df_result|> filter(assignments == i) |> dplyr::select(-assignments)
-    actuals = df_result|> filter(assignments == i) |> pull(outcome) }
-  
-  
-  glm.fit = glm(outcome ~ ., data = data, family = binomial)
-  # Predict on the test data
-  probabilities = predict(glm.fit, newdata = data, type = "response")
-  # Calculate AUC
-  roc_obj = roc(actuals, probabilities)
-  auc_value = auc(roc_obj)
-  print(auc_value)
-  # Plot ROC curve
-  plot(roc_obj, main=sprintf("ROC Curve (AUC = %0.2f)", auc_value))
-}
+df_result= EvalFunc(fit5, k = 5)
+print(df_result$auc_plot)
+df_result$df_tpr
 ```
 

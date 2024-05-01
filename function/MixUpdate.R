@@ -37,8 +37,7 @@ MixUpdate = function (n0, n1, k,d, data_comp, data_incomp,theta)
   })
   new_gamma <- Responsibility(n0, n1, k,data_comp, data_incomp, new_means, new_covs,old_pi)
   new_pi <- old_cluster_sizes/sum(old_cluster_sizes)
-  new_obj <- MixEMObj(old_cluster_sizes, new_pi, new_covs, 
-                      new_resid_ops)
+  new_obj <- MixEMObj(old_cluster_sizes, new_pi, new_covs,new_resid_ops)
   delta <- new_obj - old_obj
   out <- list()
   out$means <- new_means

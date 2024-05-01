@@ -1,3 +1,10 @@
+# EM Objective for a Gaussian Mixture Model
+
+# cluster_sizes Cluster sizes.
+# pi Cluster proportions
+# covs List of component covariances. 
+# resid_ops List of residual outer products.
+
 MixEMObj = function (cluster_sizes, pi, covs, resid_ops) 
 {
   k <- length(pi)

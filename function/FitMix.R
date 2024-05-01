@@ -40,6 +40,6 @@ FitMix=function (data, k = 2, maxit = 1000, eps = 1e-06,  report = TRUE)
               Covariances = theta1$covs, 
               Objective = theta1$new_obj,
               Proportions = theta1$pi,
-              BIC = log(n_row)* (d * k) - theta1$new_obj )
+              BIC = log(n_row)* (d * k) - 2*theta1$new_obj )
   return(out)
 }

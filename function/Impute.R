@@ -1,4 +1,4 @@
-MixImpute = function (n0,n1,d,k,data_comp,data_incomp,init_order, theta) 
+Impute = function (n0,n1,d,k,data_comp,data_incomp,init_order, theta) 
 {
   
   out <- matrix(NA, nrow = 0, ncol = d)

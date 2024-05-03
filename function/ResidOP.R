@@ -1,4 +1,4 @@
-MixResidOP = function (n0,n1,d,k, data_comp, data_incomp,new_means, old_means, covs, gamma) 
+ResidOP = function (n0,n1,d,k, data_comp, data_incomp,new_means, old_means, covs, gamma) 
 {
   out <- lapply(seq_len(k), function(j) {
     resid_op <- array(0, dim = c(d, d))

@@ -31,8 +31,7 @@ Responsibility = function (n0, n1, k,data_comp, data_incomp, means, covs, pi) {
                           .fun = function(x) {
                             x/sum(x)
                           }, .drop = FALSE)
-    colnames(dens_eval1) <- colnames(gamma1) <- paste0("k", 
-                                                       seq(1:k))
+    colnames(dens_eval1) <- colnames(gamma1) <- paste0("k", seq(1:k))
     rownames(dens_eval1) <- rownames(gamma1) <- seq(1:n1)
     out$dens_eval1 <- dens_eval1
     out$gamma1 <- gamma1

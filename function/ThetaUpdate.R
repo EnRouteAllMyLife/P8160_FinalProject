@@ -1,12 +1,10 @@
-MixUpdate = function (n0, n1, k,d, data_comp, data_incomp,theta)
+ThetaUpdate = function (n0, n1, k,d, data_comp, data_incomp,theta)
 {
   old_means <- theta$means
   old_covs <- theta$covs
   old_pi <- theta$pi
   old_gamma <- theta$gamma
   
-  
- # old_cluster_sizes <- MixClusterSizes(split_data, old_gamma)
   
   old_cluster_sizes <- rep(0, k)
   if (n0 > 0) {
@@ -19,14 +17,14 @@ MixUpdate = function (n0, n1, k,d, data_comp, data_incomp,theta)
   }
   
   
-  old_resid_ops <- MixResidOP(n0,n1,d,k, data_comp, data_incomp, old_means, old_means, 
+  old_resid_ops <- ResidOP(n0,n1,d,k, data_comp, data_incomp, old_means, old_means, 
                               old_covs, old_gamma)
   
   old_obj <- MixEMObj(old_cluster_sizes, old_pi, old_covs,  old_resid_ops)
   
-  new_means <- MixUpdateMeans(n0,n1,k, data_comp, data_incomp, old_means, old_covs, old_gamma,old_cluster_sizes)
+  new_means <- ThetaUpdateMeans(n0,n1,k, data_comp, data_incomp, old_means, old_covs, old_gamma,old_cluster_sizes)
   
-  new_resid_ops <- MixResidOP(n0,n1,d,k, data_comp, data_incomp, new_means, old_means, 
+  new_resid_ops <- ResidOP(n0,n1,d,k, data_comp, data_incomp, new_means, old_means, 
                               old_covs, old_gamma)
   
   
@@ -39,6 +37,8 @@ MixUpdate = function (n0, n1, k,d, data_comp, data_incomp,theta)
   new_pi <- old_cluster_sizes/sum(old_cluster_sizes)
   new_obj <- MixEMObj(old_cluster_sizes, new_pi, new_covs,new_resid_ops)
   delta <- new_obj - old_obj
+  
+  # organize the output
   out <- list()
   out$means <- new_means
   out$covs <- new_covs

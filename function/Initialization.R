@@ -1,5 +1,5 @@
 # k = 2
-MixInit = function (n0, n1, k,data_comp, data_incomp,d) {
+Initialization = function (n0, n1, k,data_comp, data_incomp,d) {
   theta0 <- list()
   
   if (n0 == 0) {

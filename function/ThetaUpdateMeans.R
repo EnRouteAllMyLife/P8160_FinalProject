@@ -1,4 +1,4 @@
-MixUpdateMeans = function (n0,n1,k, data_comp, data_incomp,means, covs, gamma,cluster_sizes) 
+ThetaUpdateMeans = function (n0,n1,k, data_comp, data_incomp,means, covs, gamma,cluster_sizes) 
 {
   new_means <- lapply(seq_len(k), function(j) {
     total <- 0
